@@ -19,8 +19,8 @@ type dataInput struct {
 	testLabels *mat.Dense
 }
 
-func getInputData() (*dataInput, error) {
-	f, err := os.Open("data/train.csv")
+func getInputAndLabels(fileName string) (inputs *mat.Dense, labels *mat.Dense) {
+	f, err := os.Open(fileName)
 
 	if err != nil {
 		log.Fatal(err)
@@ -28,6 +28,7 @@ func getInputData() (*dataInput, error) {
 	defer f.Close()
 
 	reader := csv.NewReader(f)
+
 	reader.FieldsPerRecord = 7
 
 	// Read in the csv
@@ -65,57 +66,16 @@ func getInputData() (*dataInput, error) {
 		}
 	}
 
-	inputs := mat.NewDense(len(rawCSVData), 4, inputsData)
-	labels := mat.NewDense(len(rawCSVData), 3, labelsData)
+	inputs = mat.NewDense(len(rawCSVData), 4, inputsData)
+	labels = mat.NewDense(len(rawCSVData), 3, labelsData)
 
-	// guiagiudsg##################################
-	f, err = os.Open("data/test.csv")
+	return inputs, labels
+}
 
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
+func getInputData() (*dataInput, error) {
 
-	testReader := csv.NewReader(f)
-	testReader.FieldsPerRecord = 7
-
-	// Read in the test csv
-	rawTestCSVData, err := testReader.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	testInputsData := make([]float64, 4*len(rawTestCSVData))
-	testLabelsData := make([]float64, 3*len(rawTestCSVData))
-
-	inputsIndex = 0
-	labelsIndex = 0
-
-	for idx, record := range rawTestCSVData {
-		// Skip the header
-		if idx == 0 {
-			continue
-		}
-
-		for i, val := range record {
-			parsedVal, err := strconv.ParseFloat(val, 64)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if i == 4 || i == 5 || i == 6 {
-				testLabelsData[labelsIndex] = parsedVal
-				labelsIndex++
-				continue
-			}
-
-			testInputsData[inputsIndex] = parsedVal
-			inputsIndex++
-		}
-	}
-
-	testInputs := mat.NewDense(len(rawCSVData), 4, inputsData)
-	testLabels := mat.NewDense(len(rawCSVData), 3, labelsData)
+	inputs, labels := getInputAndLabels("data/train.csv")
+	testInputs, testLabels := getInputAndLabels("data/test.csv")
 
 	input := &dataInput{
 		inputs:     inputs,
