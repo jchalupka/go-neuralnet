@@ -131,7 +131,7 @@ func main() {
 				break
 			}
 		}
-		fmt.Println(predictions)
+
 		if predictions.At(i, species) == floats.Max(mat.Row(nil, i, predictions)) {
 			truePosNeg++
 		}
